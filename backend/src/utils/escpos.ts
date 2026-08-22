@@ -53,6 +53,11 @@ export class EscPosBuilder {
   private static readonly CUT = EscPosBuilder.GS + 'V' + '\x42' + '\x00';
   private static readonly DRAWER_KICK = EscPosBuilder.ESC + 'p' + '\x00' + '\x19' + '\xFA';
 
+  private centerText(text: string): string {
+    const space = Math.max(0, Math.floor((this.widthChars - text.length) / 2));
+    return ' '.repeat(space) + text;
+  }
+
   private padLine(left: string, right: string): string {
     const space = this.widthChars - left.length - right.length;
     if (space <= 0) {
@@ -83,24 +88,24 @@ export class EscPosBuilder {
     // Header
     raw.push(EscPosBuilder.ALIGN_CENTER, EscPosBuilder.DOUBLE_ON, EscPosBuilder.BOLD_ON);
     raw.push(data.shopName + '\n');
-    lines.push(data.shopName.toUpperCase());
+    lines.push(this.centerText(data.shopName.toUpperCase()));
 
     raw.push(EscPosBuilder.DOUBLE_OFF, EscPosBuilder.BOLD_OFF);
 
     if (data.branchName) {
       raw.push(data.branchName + '\n');
-      lines.push(data.branchName);
+      lines.push(this.centerText(data.branchName));
     }
 
     raw.push(data.address + '\n');
-    lines.push(data.address);
+    lines.push(this.centerText(data.address));
 
     raw.push(`Phone: ${data.phone}\n`);
-    lines.push(`Phone: ${data.phone}`);
+    lines.push(this.centerText(`Phone: ${data.phone}`));
 
     if (data.gstin) {
       raw.push(`GSTIN: ${data.gstin}\n`);
-      lines.push(`GSTIN: ${data.gstin}`);
+      lines.push(this.centerText(`GSTIN: ${data.gstin}`));
     }
 
     raw.push(EscPosBuilder.ALIGN_LEFT);
@@ -211,10 +216,10 @@ export class EscPosBuilder {
     raw.push(EscPosBuilder.ALIGN_CENTER);
     if (data.receiptFooter) {
       raw.push(data.receiptFooter + '\n');
-      lines.push(data.receiptFooter);
+      lines.push(this.centerText(data.receiptFooter));
     } else {
       raw.push('Thank you! Visit Again.\n');
-      lines.push('Thank you! Visit Again.');
+      lines.push(this.centerText('Thank you! Visit Again.'));
     }
 
     raw.push('\n\n\n'); // Feed

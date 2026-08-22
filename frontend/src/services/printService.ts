@@ -25,30 +25,65 @@ export class BrowserPrintAdapter implements PrinterAdapter {
         <!DOCTYPE html>
         <html>
           <head>
-            <title>Receipt Print</title>
+            <title>Receipt - Bismi POS</title>
             <style>
-              body {
-                font-family: 'Courier New', Courier, monospace;
-                font-size: 12px;
-                line-height: 1.3;
-                width: 72mm;
-                margin: 0 auto;
-                padding: 10px;
+              @page {
+                size: 80mm auto;
+                margin: 0;
+              }
+              html, body {
+                margin: 0;
+                padding: 0;
+                background-color: #fff;
                 color: #000;
+                font-family: 'Courier New', Courier, monospace;
+              }
+              body {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                padding: 10px;
+                box-sizing: border-box;
+              }
+              .receipt-container {
+                width: 76mm;
+                max-width: 100%;
+                margin: 0 auto;
+                padding: 4px;
+                box-sizing: border-box;
+                font-size: 11px;
+                line-height: 1.35;
               }
               pre {
                 white-space: pre-wrap;
-                word-break: break-all;
+                word-break: break-word;
+                font-family: inherit;
+                font-size: inherit;
                 margin: 0;
               }
               @media print {
-                body { width: 100%; margin: 0; padding: 0; }
-                @page { margin: 0; size: auto; }
+                html, body {
+                  width: 100%;
+                  margin: 0;
+                  padding: 0;
+                }
+                body {
+                  display: block;
+                  padding: 0;
+                }
+                .receipt-container {
+                  width: 76mm;
+                  margin: 0 auto;
+                  padding: 2mm 0;
+                }
               }
             </style>
           </head>
           <body>
-            <pre>${receiptText}</pre>
+            <div class="receipt-container">
+              <pre>${receiptText}</pre>
+            </div>
             <script>
               window.onload = function() {
                 window.focus();
