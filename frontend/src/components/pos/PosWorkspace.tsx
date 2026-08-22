@@ -258,7 +258,7 @@ export const PosWorkspace: React.FC = () => {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* B. MOBILE WORKSPACE (OPTIMIZED FOR SMARTPHONE VIEWPORTS)      */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="md:hidden flex flex-1 flex-col h-[calc(100vh-120px)] p-2 overflow-hidden relative">
+      <div className="md:hidden flex flex-1 flex-col h-[calc(100vh-120px)] p-2 pb-16 overflow-hidden relative">
         {/* Full-Width Mobile Catalog */}
         <div className="flex-1 h-full flex flex-col min-w-0 bg-surface rounded-2xl p-3 border border-border shadow-card overflow-hidden">
           <ProductGrid
@@ -267,9 +267,9 @@ export const PosWorkspace: React.FC = () => {
           />
         </div>
 
-        {/* Floating Sticky Mobile Cart Preview Bar */}
+        {/* Floating Sticky Mobile Cart Preview Bar (Fixed above bottom navbar) */}
         {cart.length > 0 && (
-          <div className="sticky bottom-1 left-0 right-0 mt-2 bg-brand-600 text-white rounded-2xl p-3 shadow-modal flex items-center justify-between z-30 animate-slideUp">
+          <div className="fixed bottom-[72px] left-3 right-3 bg-brand-600 text-white rounded-2xl p-3 shadow-modal flex items-center justify-between z-30 animate-slideUp border border-brand-400/40">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center font-bold">
                 <ShoppingBag size={18} />
@@ -278,7 +278,7 @@ export const PosWorkspace: React.FC = () => {
                 <div className="text-xs font-black leading-none">
                   {totalItemCount} {totalItemCount === 1 ? 'Item' : 'Items'} • ₹{netTotal.toFixed(2)}
                 </div>
-                <span className="text-[10px] text-white/80 font-medium">
+                <span className="text-[10px] text-white/85 font-medium">
                   Tap to view bill & checkout
                 </span>
               </div>
@@ -289,7 +289,7 @@ export const PosWorkspace: React.FC = () => {
                 sound.playTap();
                 setIsMobileCartOpen(true);
               }}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-brand-700 font-extrabold text-xs shadow-sm active:scale-95 transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-brand-700 font-extrabold text-xs shadow-md active:scale-95 transition-all"
             >
               <span>View Cart</span>
               <ArrowRight size={14} />

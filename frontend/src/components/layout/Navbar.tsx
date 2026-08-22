@@ -9,7 +9,7 @@ import sound from '../../services/soundService.js';
 export const Navbar: React.FC = () => {
   const { activeView, setActiveView, setHeldDrawerOpen, setReadyDrawerOpen, setVoiceDrawerOpen, setDayCloseModalOpen } = useUiStore();
   const { user, shop, logout } = useAuthStore();
-  const { heldOrders, readyOrders } = usePosStore();
+  const { heldOrders, readyOrders, cart } = usePosStore();
 
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
   const [pendingSyncCount, setPendingSyncCount] = useState(0);
@@ -205,6 +205,7 @@ export const Navbar: React.FC = () => {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface border-t border-border z-40 flex items-center justify-around px-2 shadow-modal safe-area-bottom">
         {mobileBottomNav.map((item) => {
           const isActive = activeView === item.id;
+          const totalCartCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
           return (
             <button
               key={item.id}
@@ -212,12 +213,17 @@ export const Navbar: React.FC = () => {
                 sound.playTap();
                 setActiveView(item.id);
               }}
-              className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${
+              className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all relative ${
                 isActive ? 'text-brand-600 font-extrabold' : 'text-ink-muted font-medium'
               }`}
             >
               <div className="relative">
                 {item.icon}
+                {item.id === 'POS' && totalCartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2.5 min-w-[17px] h-[17px] px-1 rounded-full bg-brand-600 text-white text-[9px] font-black flex items-center justify-center shadow-sm">
+                    {totalCartCount}
+                  </span>
+                )}
                 {item.id === 'PREP' && readyOrders.length > 0 && (
                   <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
                 )}

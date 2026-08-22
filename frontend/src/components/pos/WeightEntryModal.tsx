@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect } from 'react';
 import { Scale, Check, Plus, AlertTriangle } from 'lucide-react';
 import { usePosStore } from '../../store/posStore.js';
+import { useUiStore } from '../../store/uiStore.js';
 import { Modal } from '../common/Modal.js';
 import { Button } from '../common/Button.js';
 import { Numpad } from '../common/Numpad.js';
@@ -57,6 +58,7 @@ export const WeightEntryModal: React.FC = () => {
   const handleAdd = () => {
     if (!selectedProduct || numericVal <= 0) return;
     addItemToCart(selectedProduct, numericVal, selectedOption);
+    useUiStore.getState().showToast('success', `Added ${selectedProduct.name} (${numericVal} ${selectedProduct.unit}) to bill`);
   };
 
   // Keyboard Enter shortcut to add
