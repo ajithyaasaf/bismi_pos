@@ -1,0 +1,362 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Shop {
+  id               String          @id @default(uuid())
+  name             String
+  branchName       String?
+  address          String
+  phone            String
+  gstin            String?
+  receiptHeader    String?
+  receiptFooter    String?         @default("Thank you for choosing Bismi Chicken! Fresh & Hygienic Meat.")
+  autoPrintReceipt Boolean         @default(true)
+  paperSize        String          @default("80mm") // 58mm or 80mm
+  soundEnabled     Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  users            User[]
+  products         Product[]
+  customers        Customer[]
+  orders           Order[]
+  sales            Sale[]
+  cashSessions     CashSession[]
+  purchases        Purchase[]
+  expenses         Expense[]
+  inventoryItems   InventoryItem[]
+  auditLogs        AuditLog[]
+  printerConfigs   PrinterConfig[]
+}
+
+model User {
+  id           String        @id @default(uuid())
+  shopId       String
+  name         String
+  username     String        @unique
+  passwordHash String
+  pinHash      String        // Hashed fast 4-digit unlock PIN
+  failedPins   Int           @default(0)
+  lockedUntil  DateTime?
+  role         String        @default("CASHIER") // OWNER, MANAGER, CASHIER, PREPARATION_WORKER
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+
+  shop         Shop          @relation(fields: [shopId], references: [id])
+  sales        Sale[]
+  cashSessions CashSession[]
+  auditLogs    AuditLog[]
+}
+
+model Product {
+  id                  String                 @id @default(uuid())
+  shopId              String
+  code                String
+  name                String
+  nameLocal           String?                // Local language (e.g. Tamil: கோழி இறைச்சி)
+  category            String                 // Fresh Meat, Offal, Country Chicken, Eggs, Masala, Packaged
+  pricingType         String                 @default("WEIGHT_BASED") // WEIGHT_BASED, QUANTITY_BASED
+  unit                String                 @default("KG") // KG, GRAM, PIECE, PACK
+  currentSellingPrice Float
+  currentCostPrice    Float
+  warningWeightLimit  Float                  @default(5.000)
+  criticalWeightLimit Float                  @default(10.000)
+  isQuickSelect       Boolean                @default(true)
+  displayOrder        Int                    @default(0)
+  isActive            Boolean                @default(true)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  shop                Shop                   @relation(fields: [shopId], references: [id])
+  prices              ProductPrice[]
+  options             ProductOption[]
+  orderItems          OrderItem[]
+  saleItems           SaleItem[]
+  inventoryItem       InventoryItem?
+  inventoryTx         InventoryTransaction[]
+
+  @@unique([shopId, code])
+}
+
+model ProductPrice {
+  id            String    @id @default(uuid())
+  productId     String
+  sellingPrice  Float
+  costPrice     Float
+  effectiveFrom DateTime  @default(now())
+  effectiveTo   DateTime?
+  createdById   String
+
+  product       Product   @relation(fields: [productId], references: [id])
+}
+
+model ProductOption {
+  id          String      @id @default(uuid())
+  productId   String
+  name        String      // Curry Cut, Biryani Cut, 65 Cut, Boneless, Skinless, Whole
+  extraCharge Float       @default(0.00)
+  isDefault   Boolean     @default(false)
+  isActive    Boolean     @default(true)
+
+  product     Product     @relation(fields: [productId], references: [id])
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id                   String      @id @default(uuid())
+  shopId               String
+  dailyOrderNumber     Int         // Sequence reset daily (#1001, #1002...)
+  status               String      @default("DRAFT") // DRAFT, HELD, PREPARING, READY, COMPLETED, CANCELLED
+  customerId           String?
+  customerName         String?     @default("Walk-in Customer")
+  totalEstimatedAmount Float       @default(0.00)
+  totalFinalAmount     Float       @default(0.00)
+  notes                String?
+  createdAt            DateTime    @default(now())
+  readyAt              DateTime?
+  completedAt          DateTime?
+
+  shop                 Shop        @relation(fields: [shopId], references: [id])
+  customer             Customer?   @relation(fields: [customerId], references: [id])
+  items                OrderItem[]
+  sale                 Sale?
+}
+
+model OrderItem {
+  id              String         @id @default(uuid())
+  orderId         String
+  productId       String
+  optionId        String?
+  productName     String
+  unitPrice       Float
+  costPrice       Float
+  requestedWeight Float?         // Initial requested weight (e.g. 2.000 KG)
+  finalWeight     Float?         // Actual dressed weight from prep (e.g. 1.820 KG)
+  quantity        Float          @default(1.000)
+  cuttingCharge   Float          @default(0.00)
+  itemTotal       Float
+  isPrepared      Boolean        @default(false)
+
+  order           Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product         Product        @relation(fields: [productId], references: [id])
+  option          ProductOption? @relation(fields: [optionId], references: [id])
+}
+
+model Sale {
+  id             String              @id @default(uuid())
+  shopId         String
+  orderId        String?             @unique
+  invoiceNumber  String              @unique // INV-YYYYMMDD-XXXX
+  localSaleId    String?             // Offline client UUID
+  cashierId      String
+  customerId     String?
+  subtotal       Float
+  discountAmount Float               @default(0.00)
+  taxAmount      Float               @default(0.00)
+  roundingAmount Float               @default(0.00)
+  finalAmount    Float
+  costAmount     Float
+  grossProfit    Float
+  status         String              @default("COMPLETED") // COMPLETED, CANCELLED, REFUNDED
+  isSynced       Boolean             @default(true)
+  createdAt      DateTime            @default(now())
+
+  shop           Shop                @relation(fields: [shopId], references: [id])
+  cashier        User                @relation(fields: [cashierId], references: [id])
+  customer       Customer?           @relation(fields: [customerId], references: [id])
+  order          Order?              @relation(fields: [orderId], references: [id])
+  items          SaleItem[]
+  payments       Payment[]
+  printJobs      PrintJob[]
+  creditTx       CreditTransaction[]
+}
+
+model SaleItem {
+  id              String   @id @default(uuid())
+  saleId          String
+  productId       String
+  productName     String   // Immutable historical snapshot
+  unit            String
+  unitPrice       Float    // Immutable snapshot of rate at time of sale
+  costPrice       Float
+  requestedWeight Float?
+  finalWeight     Float?   // Actual billed weight
+  quantity        Float
+  cuttingName     String?  // Immutable cut name
+  cuttingCharge   Float    @default(0.00)
+  totalPrice      Float
+  grossProfit     Float
+
+  sale            Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product         Product  @relation(fields: [productId], references: [id])
+}
+
+model Payment {
+  id             String   @id @default(uuid())
+  saleId         String
+  method         String   // CASH, UPI, CARD, CREDIT, SPLIT
+  amount         Float
+  cashReceived   Float?
+  cashChange     Float?
+  transactionRef String?
+  createdAt      DateTime @default(now())
+
+  sale           Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+}
+
+model Customer {
+  id            String              @id @default(uuid())
+  shopId        String
+  name          String
+  phone         String              @unique
+  address       String?
+  creditBalance Float               @default(0.00)
+  creditLimit   Float               @default(5000.00)
+  isActive      Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+
+  shop          Shop                @relation(fields: [shopId], references: [id])
+  orders        Order[]
+  sales         Sale[]
+  creditTx      CreditTransaction[]
+}
+
+model CreditTransaction {
+  id           String   @id @default(uuid())
+  customerId   String
+  saleId       String?
+  type         String   // CREDIT_SALE, REPAYMENT_RECEIVED, ADJUSTMENT
+  amount       Float
+  balanceAfter Float
+  notes        String?
+  createdById  String
+  createdAt    DateTime @default(now())
+
+  customer     Customer @relation(fields: [customerId], references: [id])
+  sale         Sale?    @relation(fields: [saleId], references: [id])
+}
+
+model InventoryItem {
+  id                String   @id @default(uuid())
+  shopId            String
+  productId         String   @unique
+  currentStockKg    Float    @default(0.000)
+  currentStockUnits Float    @default(0.000)
+  lowStockThreshold Float    @default(10.000)
+  lastReconciledAt  DateTime @default(now())
+
+  shop              Shop     @relation(fields: [shopId], references: [id])
+  product           Product  @relation(fields: [productId], references: [id])
+}
+
+model InventoryTransaction {
+  id          String   @id @default(uuid())
+  shopId      String
+  productId   String
+  type        String   // PURCHASE, SALE_DEDUCTION, WASTAGE_SPOILAGE, CUTTING_LOSS, MANUAL_ADJUSTMENT
+  quantityKg  Float
+  unitCost    Float
+  reason      String?
+  createdById String
+  createdAt   DateTime @default(now())
+
+  product     Product  @relation(fields: [productId], references: [id])
+}
+
+model Purchase {
+  id           String   @id @default(uuid())
+  shopId       String
+  supplierName String
+  invoiceNo    String?
+  totalAmount  Float
+  notes        String?
+  purchaseDate DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  shop         Shop     @relation(fields: [shopId], references: [id])
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  shopId      String
+  category    String   // Rent, Electricity, Salary, Ice, Transport, Packaging, Maintenance
+  amount      Float
+  paymentMode String   @default("CASH")
+  description String?
+  expenseDate DateTime @default(now())
+  createdById String
+  createdAt   DateTime @default(now())
+
+  shop        Shop     @relation(fields: [shopId], references: [id])
+}
+
+model CashSession {
+  id                String    @id @default(uuid())
+  shopId            String
+  userId            String
+  openedAt          DateTime  @default(now())
+  closedAt          DateTime?
+  openingCash       Float
+  expectedCash      Float     @default(0.00)
+  actualCash        Float?
+  difference        Float?
+  totalCashSales    Float     @default(0.00)
+  totalCashExpenses Float     @default(0.00)
+  notes             String?
+  status            String    @default("OPEN") // OPEN, CLOSED
+
+  shop              Shop      @relation(fields: [shopId], references: [id])
+  user              User      @relation(fields: [userId], references: [id])
+}
+
+model PrintJob {
+  id           String   @id @default(uuid())
+  shopId       String
+  saleId       String
+  printerName  String
+  jobType      String   // RECEIPT, KITCHEN_TICKET, REPRINT, TEST
+  rawPayload   String?  // Base64 ESC/POS payload or formatted text
+  status       String   @default("QUEUED") // QUEUED, PRINTING, PRINTED, FAILED
+  errorMessage String?
+  attempts     Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  sale         Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+}
+
+model PrinterConfig {
+  id            String   @id @default(uuid())
+  shopId        String
+  name          String
+  adapterType   String   // QZ_TRAY, NETWORK_ESC_POS, WEB_USB, BROWSER_PRINT
+  connectionStr String
+  paperWidth    String   @default("80mm") // 58mm, 80mm
+  autoCut       Boolean  @default(true)
+  openDrawer    Boolean  @default(true)
+  isDefault     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  shop          Shop     @relation(fields: [shopId], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  shopId     String
+  userId     String
+  action     String   // PRICE_CHANGE, SALE_CANCEL, REFUND, STOCK_ADJUST, REPRINT, PIN_FAIL, DAY_CLOSE
+  entityName String
+  entityId   String
+  oldValue   String?  // JSON string
+  newValue   String?  // JSON string
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  shop       Shop     @relation(fields: [shopId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+}
