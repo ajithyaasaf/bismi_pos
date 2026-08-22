@@ -8,16 +8,24 @@ export interface ProductGridProps {
   isLoading?: boolean;
 }
 
+const ORDERED_CATEGORIES = ['ALL', 'Fresh Meat', 'Offal', 'Prime Cuts', 'Eggs', 'Masala'];
+
 export const ProductGrid: React.FC<ProductGridProps> = ({ products, isLoading }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const categories = useMemo(() => {
-    const set = new Set<string>();
+    const productCats = new Set<string>();
     products.forEach((p) => {
-      if (p.category) set.add(p.category);
+      if (p.category) productCats.add(p.category);
     });
-    return ['ALL', ...Array.from(set)];
+
+    // Show the requested 5 categories in exact order
+    const ordered = ORDERED_CATEGORIES.filter((c) => c === 'ALL' || productCats.has(c));
+    productCats.forEach((c) => {
+      if (!ordered.includes(c)) ordered.push(c);
+    });
+    return ordered;
   }, [products]);
 
   // Global F1 search shortcut
