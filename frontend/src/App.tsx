@@ -54,9 +54,11 @@ export const App: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-surface">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-brand-500 flex items-center justify-center text-white text-2xl font-black shadow-brand animate-pulse">
-            🐔
-          </div>
+          <img
+            src="/logo.png"
+            alt="Bismi Broilers"
+            className="w-16 h-16 object-contain animate-bounce drop-shadow-sm"
+          />
           <span className="text-sm font-bold text-ink-secondary">Loading Bismi POS...</span>
         </div>
       </div>
@@ -69,12 +71,14 @@ export const App: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen bg-surface-muted/60 p-4">
         <div className="w-full max-w-md bg-surface border border-border rounded-3xl p-8 shadow-modal flex flex-col gap-6">
           <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-3xl bg-brand-500 flex items-center justify-center text-white text-3xl font-black shadow-brand mb-3">
-              🐔
-            </div>
+            <img
+              src="/logo.png"
+              alt="Bismi Broilers"
+              className="w-20 h-20 object-contain mb-3 drop-shadow-md"
+            />
             <h2 className="text-2xl font-black text-ink-primary tracking-tight">BISMI POS</h2>
             <p className="text-xs font-semibold text-brand-600 mt-1">
-              Fresh Chicken & Meat High-Velocity Billing
+              Bismi Broilers • Farm Fresh Meat Billing
             </p>
           </div>
 

@@ -60,16 +60,18 @@ export const Navbar: React.FC = () => {
       <header className="h-14 md:h-16 bg-surface border-b border-border px-3 md:px-4 flex items-center justify-between select-none shadow-sm z-30 flex-shrink-0">
         {/* Brand & Store Name */}
         <div className="flex items-center gap-2 md:gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-brand-500 flex items-center justify-center text-white font-black text-lg md:text-xl shadow-brand">
-              🐔
-            </div>
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/logo.png"
+              alt="Bismi Broilers"
+              className="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-xs"
+            />
             <div>
               <h1 className="text-xs md:text-sm font-black text-ink-primary tracking-tight leading-none">
                 BISMI POS
               </h1>
               <span className="text-[9px] md:text-[10px] font-semibold text-brand-600 truncate max-w-[120px] md:max-w-none block">
-                {shop?.name || 'Fresh Chicken & Meats'}
+                {shop?.name || 'Bismi Broilers • Farm Fresh'}
               </span>
             </div>
           </div>
