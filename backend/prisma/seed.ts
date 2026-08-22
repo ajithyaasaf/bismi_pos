@@ -9,13 +9,13 @@ async function main() {
   // 1. Create Shop
   const shop = await prisma.shop.create({
     data: {
-      name: 'Bismi Fresh Chicken & Meats',
-      branchName: 'Main Branch - Bazaar Road',
-      address: 'No. 42, Market Main Road, Triplicane, Chennai - 600005',
-      phone: '+91 98401 23456',
+      name: 'Bismi Broilers',
+      branchName: 'முதுகுளத்தூர் (Mudukulathur)',
+      address: 'ஹயர்நிஷா மருத்துவமனை அருகில், (SBI ATM) எதிரில், முதுகுளத்தூர்',
+      phone: '+91 86810 87082',
       gstin: '33AAAAA0000A1Z5',
-      receiptHeader: 'BISMI FRESH CHICKEN & MEATS\n100% Halal & Hygienically Processed Daily',
-      receiptFooter: 'Thank you for choosing Bismi Chicken!\nNo Antibiotics • Farm Fresh Daily • Quality Guaranteed',
+      receiptHeader: 'பிஸ்மி பிராய்லர்ஸ் (Bismi Broilers)\nஹயர்நிஷா மருத்துவமனை அருகில், (SBI ATM) எதிரில், முதுகுளத்தூர்',
+      receiptFooter: 'நன்றி! மீண்டும் வருக!\nThank you for choosing Bismi Broilers!\nFresh & Hygienic Daily',
       autoPrintReceipt: true,
       paperSize: '80mm',
       soundEnabled: true,
