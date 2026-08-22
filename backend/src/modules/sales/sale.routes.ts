@@ -5,6 +5,7 @@ import { authenticateToken } from '../../middleware/auth.js';
 const router = Router();
 
 router.use(authenticateToken);
+router.post('/', checkout);
 router.post('/checkout', checkout);
 router.post('/sync-offline', syncOfflineSales);
 router.get('/', getSalesHistory);
