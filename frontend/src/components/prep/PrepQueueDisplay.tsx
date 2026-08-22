@@ -116,7 +116,7 @@ export const PrepQueueDisplay: React.FC = () => {
   const pendingList = queueData || [];
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-64px)] p-4 bg-surface-muted/30 overflow-hidden">
+    <div className="flex-1 flex flex-col h-[calc(100vh-56px)] md:h-[calc(100vh-64px)] p-2 md:p-4 pb-20 md:pb-4 bg-surface-muted/30 overflow-hidden">
       {/* KDS Header Banner */}
       <div className="flex items-center justify-between p-4 bg-surface border border-border rounded-2xl shadow-card mb-4 flex-shrink-0">
         <div className="flex items-center gap-3">

@@ -69,7 +69,7 @@ export const ExpenseTracker: React.FC = () => {
   const totalExpenseSum = expenses?.reduce((sum: number, exp: any) => sum + exp.amount, 0) || 0;
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-64px)] p-6 bg-surface-muted/30 overflow-hidden">
+    <div className="flex-1 flex flex-col h-[calc(100vh-56px)] md:h-[calc(100vh-64px)] p-3 md:p-6 pb-24 md:pb-6 bg-surface-muted/30 overflow-hidden">
       {/* Header Bar */}
       <div className="flex items-center justify-between pb-4 border-b border-border flex-shrink-0">
         <div>
